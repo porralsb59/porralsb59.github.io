@@ -525,23 +525,24 @@ selSim.addEventListener('change',()=>iniciaSim(+selSim.value));
 document.getElementById('reset-sim').addEventListener('click',()=>iniciaSim(simJ));
 
 /* ---------- DIARIS ---------- */
-const PDFS = DADES.diaris || {};
+/* Cada Diari es llegeix dins de la mateixa finestra, com una pàgina de diari.
+   La imatge es baixa només quan es demana; a sota hi ha l'enllaç al PDF
+   original per si algú el vol desar o imprimir. */
+const DIARIS = (DIARI || DADES.diaris) || {};
 document.getElementById('diaris').innerHTML = Array.from({length:NJ},(_,k)=>k+1).filter(n=>n<=ULTIMA+3).map(n=>{
-  const hi = n<=ULTIMA && (DIARI ? !!DIARI[n] : !!PDFS[n]);
-  const boto = DIARI || !hi
-    ? `<button class="btn ${hi?'solid':'ghost'}" data-diari="${n}">${hi?'Llegir-lo':'Pendent'}</button>`
-    : `<a class="btn solid" data-fora href="${PDFS[n]}" target="_blank" rel="noopener">Llegir-lo</a>`;
+  const hi = n<=ULTIMA && !!DIARIS[n];
   return `<div class="diari"><div class="n">${String(n).padStart(2,'0')}</div>
    <div class="t"><b>Jornada ${n}</b><span>${hi?'Publicat':'Encara no publicat'}</span></div>
-   ${boto}</div>`;
+   <button class="btn ${hi?'solid':'ghost'}" data-diari="${n}">${hi?'Llegir-lo':'Pendent'}</button></div>`;
 }).join('');
 function obreDiari(n){
   if(n>ULTIMA){ crit('El Diari de la jornada '+n+' encara no s\'ha publicat.'); return; }
-  const d=DIARI && DIARI[n];
+  const d=DIARIS[n];
   if(!d){ crit('Aquest Diari encara no s\'ha publicat.'); return; }
   const v=document.getElementById('diari-view');
   v.innerHTML = `<div class="eyebrow">Diari de la Porra · jornada ${n}</div>
-    <div class="pdfview">${d.map(src=>`<img src="${src}" alt="Pàgina del Diari de la Porra de la jornada ${n}" loading="lazy">`).join('')}</div>`;
+    <div class="pdfview"><img src="${d.img}" alt="Diari de la Porra de la jornada ${n}"></div>
+    ${d.pdf?`<div class="macts" style="padding:0 0 10px"><a class="btn ghost" data-fora href="${d.pdf}" target="_blank" rel="noopener">Obrir el PDF a part</a></div>`:''}`;
   v.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
